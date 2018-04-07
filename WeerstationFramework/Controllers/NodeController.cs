@@ -15,6 +15,7 @@ namespace WeerstationFramework.Controllers
         {
             System.Diagnostics.Debug.WriteLine(id);
             System.Diagnostics.Debug.WriteLine(HttpContext.Current.Request.UserHostAddress);
+            System.Diagnostics.Debug.WriteLine(HttpContext.Current.Request.UserHostAddress);
             return "OK";
         }
     }
