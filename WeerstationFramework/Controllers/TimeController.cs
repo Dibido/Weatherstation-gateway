@@ -11,7 +11,7 @@ namespace WeerstationFramework.Controllers
     {
         public String get()
         {
-            return DateTime.Now.ToString("HH:mm:ss:fff");
+            return DateTime.Now.ToString("yyyy:M:d:HH:mm:ss");
         }
     }
 }
