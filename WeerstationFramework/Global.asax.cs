@@ -11,7 +11,6 @@ namespace WeerstationFramework
     {
         protected void Application_Start()
         {
-
             GlobalConfiguration.Configure(WebApiConfig.Register);
         }
     }

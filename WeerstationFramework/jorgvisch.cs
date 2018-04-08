@@ -12,7 +12,7 @@ namespace WeerstationFramework
     public static class jorgvisch
     {
         //2018-03-16T10:18:31.7452075+01:00
-        private static string getToken()
+        public static string getToken()
         {
             var request = WebRequest.CreateHttp("http://iot.jorgvisch.nl/token");
             request.Method = "POST";
@@ -36,7 +36,7 @@ namespace WeerstationFramework
             return token;
         }
 
-        private static void getGreetingUnauth()
+        public static void getGreetingUnauth()
         {
             HttpWebRequest request = WebRequest.CreateHttp("http://iot.jorgvisch.nl/api/greetings");
             WebResponse response = request.GetResponse();
@@ -49,7 +49,7 @@ namespace WeerstationFramework
             Console.WriteLine();
         }
 
-        private static void getGreetingAuth(string token)
+        public static void getGreetingAuth(string token)
         {
             HttpWebRequest request = WebRequest.CreateHttp("http://iot.jorgvisch.nl/api/greetings");
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
@@ -64,14 +64,13 @@ namespace WeerstationFramework
             Console.WriteLine();
         }
 
-        private static void sendSensorData(String token, String name, DateTime time, float temp, float lux)
+        public static void sendSensorData(String token, String name, DateTime time, decimal temp, decimal lux)
         {
-            Console.WriteLine("{\"Weatherstation\": \"" + name + "\",\"Timestamp\": \"" + time.GetDateTimeFormats() + "\",\"Temperature\": " + temp.ToString() + ",\"Illuminance\": " + lux.ToString() + "}");
+            //Console.WriteLine("{\"Weatherstation\": \"" + name + "\",\"Timestamp\": \"" + time.GetDateTimeFormats() + "\",\"Temperature\": " + temp.ToString() + ",\"Illuminance\": " + lux.ToString() + "}");
             HttpWebRequest request = WebRequest.CreateHttp("http://iot.jorgvisch.nl/api/Weather");
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
             request.Method = "POST";
             request.ContentType = "application/json";
-
             Console.WriteLine(request);
 
             Stream data = request.GetRequestStream();
