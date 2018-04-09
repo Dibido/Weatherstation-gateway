@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -13,14 +14,43 @@ namespace WeerstationFramework.Controllers
     public class NodeController : ApiController
     {
         [HttpPost]
-        public void post([FromBody]String node, [FromBody]float min, [FromBody]float max)
+        public void post([FromBody]nodeData nodeMinMax)
         {
-            System.Diagnostics.Debug.WriteLine(node + ":" + min + ":" + max);
-            //lookup ip
-            String ip = iptable.table.FirstOrDefault(x => x.Key == node).Value;
-            //send post request with the min and max
+            System.Diagnostics.Debug.WriteLine("in post");
+            if (nodeMinMax != null)
+            {
+                System.Diagnostics.Debug.WriteLine(nodeMinMax.name);
+                //lookup ip
+                String ip = iptable.table.FirstOrDefault(x => x.Key == nodeMinMax.name).Value;
+                if (string.IsNullOrEmpty(ip))
+                {
+                    System.Diagnostics.Debug.WriteLine("Node " + nodeMinMax.name + " was not found.");
+                    return;
+                }
+                //send post request with the min and max
+                HttpWebRequest request = WebRequest.CreateHttp("http://" + ip + "/temp");
+                request.Method = "POST";
+                request.Host = ip;
+                request.ContentType = "application/json";
+                Stream requestdata = request.GetRequestStream();
+                System.IO.StreamWriter content = new StreamWriter(requestdata);
 
-            //read out the response
+                String json = "{“min”:" + nodeMinMax.min + ",“max”" + nodeMinMax.max +"}";
+                System.Diagnostics.Debug.WriteLine(json);
+                Console.WriteLine(json);
+                content.Write(json);
+                content.Close();
+                //read out the responsecode
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                if ((int)response.StatusCode == 200)
+                {
+                    System.Diagnostics.Debug.WriteLine("Set the min and max");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("post was null");
+            }
         }
 
         public HttpResponseMessage Get()
