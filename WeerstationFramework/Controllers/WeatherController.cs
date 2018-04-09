@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using Newtonsoft.Json;
 
 namespace WeerstationFramework.Controllers
 {
@@ -21,19 +20,25 @@ namespace WeerstationFramework.Controllers
                 System.Diagnostics.Debug.WriteLine("sending values to server:");
                 System.Diagnostics.Debug.WriteLine(weather.temp);
                 System.Diagnostics.Debug.WriteLine(weather.lux);
-                //System.Diagnostics.Debug.WriteLine(weather.time.ToString());
-                //dynamic values = JsonConvert.DeserializeObject(weather);
+                System.Diagnostics.Debug.WriteLine(weather.time);
                 //Get the ip
                 String ipaddress = HttpContext.Current.Request.UserHostAddress;
-                //Get the associated node name
                 String name = iptable.table.FirstOrDefault(x => x.Value == ipaddress).Key;
                 //If the node is not in the iptable, give an error.
                 if (string.IsNullOrEmpty(name))
                 {
+                    //Add the node into the table
                     System.Diagnostics.Debug.WriteLine("Node name is not known for ip" + ipaddress + ".");
+                    iptable.table.Add(new KeyValuePair<string, string>(weather.name, HttpContext.Current.Request.UserHostAddress));
                 }
+                //Get the associated node name
+                name = iptable.table.FirstOrDefault(x => x.Value == ipaddress).Key;
                 System.Diagnostics.Debug.WriteLine("sending values to server");
-                jorgvisch.sendSensorData(name, DateTime.Now, weather.temp, weather.lux);
+                jorgvisch.sendSensorData(name, weather.time, weather.temp, weather.lux);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Weather was null");
             }
         }
     }

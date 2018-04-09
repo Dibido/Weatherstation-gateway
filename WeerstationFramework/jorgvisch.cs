@@ -53,7 +53,7 @@ namespace WeerstationFramework
 
             String temperature = temp.ToString().Replace(',', '.');
             String light = lux.ToString().Replace(',', '.');
-            String json = "{\"Weatherstation\": \"" + name + "\",\"Timestamp\":\"" + DateTime.Now + "\",\"Temperature\": " + temperature + ",\"Illuminance\": " + light + "}";
+            String json = "{\"Weatherstation\": \"" + name + "\",\"Timestamp\":\"" + time + "\",\"Temperature\": " + temperature + ",\"Illuminance\": " + light + "}";
             System.Diagnostics.Debug.WriteLine(json);
             Console.WriteLine(json);
 
