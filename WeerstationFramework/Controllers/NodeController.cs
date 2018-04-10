@@ -20,6 +20,8 @@ namespace WeerstationFramework.Controllers
             String ip = iptable.table.FirstOrDefault(x => x.Key == node).Value;
             //send post request with the min and max
 
+
+
             //read out the response
         }
 
@@ -43,9 +45,15 @@ namespace WeerstationFramework.Controllers
             {
                 iptable.table[id] = HttpContext.Current.Request.UserHostAddress;
             }
-            //If the name and ip are not in the table add them.
-            else if (!iptable.table.Contains(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress)))
+            // If the IP is also not in the table:
+            else if (iptable.table.FirstOrDefault(x => x.Value == HttpContext.Current.Request.UserHostAddress).Key == null)
             {
+                iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
+            }
+            //If the IP IS already registred in the table, change its name by remove/adding.
+            else
+            {
+                iptable.table.Remove(iptable.table.FirstOrDefault(x => x.Value == HttpContext.Current.Request.UserHostAddress).Key);
                 iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
             }
             return "OK";
