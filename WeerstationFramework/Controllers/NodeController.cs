@@ -40,7 +40,6 @@ namespace WeerstationFramework.Controllers
             ASCIIEncoding encoding = new ASCIIEncoding();
             byte[] data = encoding.GetBytes(json);
 
-
             request.ContentLength = data.Length;
             Stream requestdata = request.GetRequestStream();
             requestdata.Write(data, 0, data.Length);
