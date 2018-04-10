@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Nodedata.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="Weatherdata.cs" />
     <Compile Include="Controllers\WeatherController.cs" />

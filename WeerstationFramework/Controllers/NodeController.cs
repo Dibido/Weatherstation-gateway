@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Web;
 using System.Web.Http;
 
@@ -13,16 +15,52 @@ namespace WeerstationFramework.Controllers
     public class NodeController : ApiController
     {
         [HttpPost]
-        public void post([FromBody]String node, [FromBody]float min, [FromBody]float max)
+        public void post([FromBody]Nodedata nodedata)
         {
-            System.Diagnostics.Debug.WriteLine(node + ":" + min + ":" + max);
+            System.Diagnostics.Debug.WriteLine(nodedata.name + ":" + nodedata.min + ":" + nodedata.max);
+            
             //lookup ip
-            String ip = iptable.table.FirstOrDefault(x => x.Key == node).Value;
+            String ip = iptable.table.FirstOrDefault(x => x.Key == nodedata.name).Value;
+            if (string.IsNullOrEmpty(ip)) // If there is no IP available for a node with the given name
+            {
+                System.Diagnostics.Debug.WriteLine("return, no match");
+                return;
+            }
+            System.Diagnostics.Debug.WriteLine(ip);
             //send post request with the min and max
+            HttpWebRequest request = WebRequest.CreateHttp("http://" + ip + "/temp");
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            String tempMin = nodedata.min.ToString();
+            String tempMax = nodedata.max.ToString();
+            String json = "{\"min\":" + tempMin + ",\"max\":" + tempMax + "}";
+            System.Diagnostics.Debug.WriteLine(ip);
+            System.Diagnostics.Debug.WriteLine("ContentLength: " + json.Length);
+
+            ASCIIEncoding encoding = new ASCIIEncoding();
+            byte[] data = encoding.GetBytes(json);
 
 
+            request.ContentLength = data.Length;
+            Stream requestdata = request.GetRequestStream();
+            requestdata.Write(data, 0, data.Length);
+            requestdata.Close();
 
-            //read out the response
+           // StreamWriter content = new StreamWriter(requestdata);
+
+            System.Diagnostics.Debug.WriteLine(json);
+            /*
+            content.WriteAsync(json);
+            content.Close();
+            requestdata.Close();
+
+            WebResponse response = request.GetResponse();
+            Stream responseData = response.GetResponseStream();
+            StreamReader reader = new StreamReader(responseData);
+            string html = reader.ReadToEnd();
+
+            System.Diagnostics.Debug.WriteLine(html);
+            */
         }
 
         public HttpResponseMessage Get()
@@ -56,6 +94,7 @@ namespace WeerstationFramework.Controllers
                 iptable.table.Remove(iptable.table.FirstOrDefault(x => x.Value == HttpContext.Current.Request.UserHostAddress).Key);
                 iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
             }
+            System.Diagnostics.Debug.WriteLine("OK");
             return "OK";
         }
     }
