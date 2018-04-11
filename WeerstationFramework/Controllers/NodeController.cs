@@ -55,6 +55,7 @@ namespace WeerstationFramework.Controllers
                     Stream streamdata = arduinoresponse.GetResponseStream();
                     StreamReader reader = new StreamReader(streamdata);
                     string html = reader.ReadToEnd();
+                    reader.Close();
 
                     System.Diagnostics.Debug.WriteLine(html);
 

@@ -98,6 +98,7 @@ namespace WeerstationFramework
             Stream responseData = response.GetResponseStream();
             StreamReader reader = new StreamReader(responseData);
             string html = reader.ReadToEnd();
+            reader.Close();
         }
     }
 }
