@@ -67,7 +67,7 @@ namespace WeerstationFramework
             }
 
             var combinedString = String.Join("", tableContents.ToArray());
-            var table = "<!DOCTYPE html><html><head><title>Connected nodes</title></head><body><table>" + combinedString + "</table></body></html>";
+            var table = "<!DOCTYPE html><html><head><title>Temperature Data</title></head><body><table>" + combinedString + "</table></body></html>";
             var response = new HttpResponseMessage();
             response.Content = new StringContent(table);
             response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
