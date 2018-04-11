@@ -5,10 +5,10 @@ using System.Web;
 
 namespace WeerstationFramework
 {
-    public class nodeData
+    public class Nodedata
     {
         public String name { get; set; }
-        public int min { get; set; }
-        public int max { get; set; }
+        public decimal min { get; set; }
+        public decimal max { get; set; }
     }
 }
