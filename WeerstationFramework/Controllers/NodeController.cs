@@ -15,7 +15,7 @@ namespace WeerstationFramework.Controllers
     public class NodeController : ApiController
     {
         [HttpPost]
-        public void post(Nodedata nodedata)
+        public HttpResponseMessage post(Nodedata nodedata)
         {
             if (nodedata != null)
             {
@@ -26,7 +26,7 @@ namespace WeerstationFramework.Controllers
                 if (string.IsNullOrEmpty(ip)) // If there is no IP available for a node with the given name
                 {
                     System.Diagnostics.Debug.WriteLine("return, no match");
-                    return;
+                    return null;
                     //return "Failed to send the message, Reason : Node name is unknown.";
                 }
                 System.Diagnostics.Debug.WriteLine(ip);
@@ -51,18 +51,30 @@ namespace WeerstationFramework.Controllers
                     requestdata.Write(data, 0, data.Length);
                     requestdata.Close();
                     //return response data
-                    //return html;
+                    WebResponse arduinoresponse = request.GetResponse();
+                    Stream streamdata = arduinoresponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(streamdata);
+                    string html = reader.ReadToEnd();
+
+                    System.Diagnostics.Debug.WriteLine(html);
+
+                    var response = new HttpResponseMessage();
+                    response.Content = new StringContent(html);
+                    response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
+                    return response;
                 }
                 //Failed to make a connection.
                 catch (Exception e)
                 {
                     System.Diagnostics.Debug.WriteLine("Unable to make a connection with node " + nodedata.name + ".");
+                    System.Diagnostics.Debug.WriteLine("Exception :" + e.ToString());
+                    return null;
                 }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("Nodedata is null");
-                return;
+                return null;
             }
         }
 

@@ -15,7 +15,6 @@ namespace WeerstationFramework.Controllers
         [HttpPost]
         public void Post([FromBody]Weatherdata weather)
         {
-            System.Diagnostics.Debug.WriteLine("TEST");
             if (weather != null)
             {
                 System.Diagnostics.Debug.WriteLine("sending values to server:");
