@@ -45,21 +45,7 @@ namespace WeerstationFramework.Controllers
             requestdata.Write(data, 0, data.Length);
             requestdata.Close();
 
-           // StreamWriter content = new StreamWriter(requestdata);
-
             System.Diagnostics.Debug.WriteLine(json);
-            /*
-            content.WriteAsync(json);
-            content.Close();
-            requestdata.Close();
-
-            WebResponse response = request.GetResponse();
-            Stream responseData = response.GetResponseStream();
-            StreamReader reader = new StreamReader(responseData);
-            string html = reader.ReadToEnd();
-
-            System.Diagnostics.Debug.WriteLine(html);
-            */
         }
 
         public HttpResponseMessage Get()
