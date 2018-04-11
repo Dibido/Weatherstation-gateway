@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Web;
 using System.Web.Http;
 
@@ -14,43 +15,37 @@ namespace WeerstationFramework.Controllers
     public class NodeController : ApiController
     {
         [HttpPost]
-        public void post([FromBody]nodeData nodeMinMax)
+        public void post([FromBody]Nodedata nodedata)
         {
-            System.Diagnostics.Debug.WriteLine("in post");
-            if (nodeMinMax != null)
+            System.Diagnostics.Debug.WriteLine(nodedata.name + ":" + nodedata.min + ":" + nodedata.max);
+            
+            //lookup ip
+            String ip = iptable.table.FirstOrDefault(x => x.Key == nodedata.name).Value;
+            if (string.IsNullOrEmpty(ip)) // If there is no IP available for a node with the given name
             {
-                System.Diagnostics.Debug.WriteLine(nodeMinMax.name);
-                //lookup ip
-                String ip = iptable.table.FirstOrDefault(x => x.Key == nodeMinMax.name).Value;
-                if (string.IsNullOrEmpty(ip))
-                {
-                    System.Diagnostics.Debug.WriteLine("Node " + nodeMinMax.name + " was not found.");
-                    return;
-                }
-                //send post request with the min and max
-                HttpWebRequest request = WebRequest.CreateHttp("http://" + ip + "/temp");
-                request.Method = "POST";
-                request.Host = ip;
-                request.ContentType = "application/json";
-                Stream requestdata = request.GetRequestStream();
-                System.IO.StreamWriter content = new StreamWriter(requestdata);
+                System.Diagnostics.Debug.WriteLine("return, no match");
+                return;
+            }
+            System.Diagnostics.Debug.WriteLine(ip);
+            //send post request with the min and max
+            HttpWebRequest request = WebRequest.CreateHttp("http://" + ip + "/temp");
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            String tempMin = nodedata.min.ToString();
+            String tempMax = nodedata.max.ToString();
+            String json = "{\"min\":" + tempMin + ",\"max\":" + tempMax + "}";
+            System.Diagnostics.Debug.WriteLine(ip);
+            System.Diagnostics.Debug.WriteLine("ContentLength: " + json.Length);
 
-                String json = "{“min”:" + nodeMinMax.min + ",“max”" + nodeMinMax.max +"}";
-                System.Diagnostics.Debug.WriteLine(json);
-                Console.WriteLine(json);
-                content.Write(json);
-                content.Close();
-                //read out the responsecode
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                if ((int)response.StatusCode == 200)
-                {
-                    System.Diagnostics.Debug.WriteLine("Set the min and max");
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("post was null");
-            }
+            ASCIIEncoding encoding = new ASCIIEncoding();
+            byte[] data = encoding.GetBytes(json);
+
+            request.ContentLength = data.Length;
+            Stream requestdata = request.GetRequestStream();
+            requestdata.Write(data, 0, data.Length);
+            requestdata.Close();
+
+            System.Diagnostics.Debug.WriteLine(json);
         }
 
         public HttpResponseMessage Get()
@@ -73,11 +68,18 @@ namespace WeerstationFramework.Controllers
             {
                 iptable.table[id] = HttpContext.Current.Request.UserHostAddress;
             }
-            //If the name and ip are not in the table add them.
-            else if (!iptable.table.Contains(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress)))
+            // If the IP is also not in the table:
+            else if (iptable.table.FirstOrDefault(x => x.Value == HttpContext.Current.Request.UserHostAddress).Key == null)
             {
                 iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
             }
+            //If the IP IS already registred in the table, change its name by remove/adding.
+            else
+            {
+                iptable.table.Remove(iptable.table.FirstOrDefault(x => x.Value == HttpContext.Current.Request.UserHostAddress).Key);
+                iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
+            }
+            System.Diagnostics.Debug.WriteLine("OK");
             return "OK";
         }
     }

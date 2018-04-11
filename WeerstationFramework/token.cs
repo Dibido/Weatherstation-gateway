@@ -30,7 +30,7 @@ namespace WeerstationFramework
 
             Stream data = request.GetRequestStream();
             StreamWriter content = new StreamWriter(data);
-            content.Write("grant_type=password&username=HS.Dokter%40student.han.nl&password=P@ssw0rd");
+            content.Write("grant_type=password&username=M.Lukasse%40student.han.nl&password=Coinknaller0!");
             content.Close();
 
             WebResponse response = request.GetResponse();
