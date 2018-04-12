@@ -91,8 +91,9 @@ namespace WeerstationFramework.Controllers
             return response;
         }
 
-        public string get(string id)
+        public void get(string id)
         {
+            System.Diagnostics.Debug.WriteLine("NodeController begin GET");
             System.Diagnostics.Debug.WriteLine(id);
             System.Diagnostics.Debug.WriteLine(HttpContext.Current.Request.UserHostAddress);
             //If the name is, update the ip.
@@ -112,7 +113,7 @@ namespace WeerstationFramework.Controllers
                 iptable.table.Add(new KeyValuePair<string, string>(id, HttpContext.Current.Request.UserHostAddress));
             }
             System.Diagnostics.Debug.WriteLine("OK");
-            return "OK";
+            return;
         }
     }
 }

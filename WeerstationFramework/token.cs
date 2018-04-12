@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Web;
 
 namespace WeerstationFramework
@@ -33,22 +34,33 @@ namespace WeerstationFramework
             content.Write("grant_type=password&username=M.Lukasse%40student.han.nl&password=Coinknaller0!");
             content.Close();
 
-            WebResponse response = request.GetResponse();
-            var response_data = response.GetResponseStream();
-            var reader = new StreamReader(response_data);
-            var json = reader.ReadToEnd();
+            try
+            {
+                WebResponse response = request.GetResponse();
+                var response_data = response.GetResponseStream();
+                var reader = new StreamReader(response_data);
+                var json = reader.ReadToEnd();
 
-            System.Diagnostics.Debug.WriteLine(json);
-            Console.WriteLine(json);
+                System.Diagnostics.Debug.WriteLine(json);
+                Console.WriteLine(json);
 
-            dynamic values = JsonConvert.DeserializeObject(json);
-            String t = values.access_token;
+                dynamic values = JsonConvert.DeserializeObject(json);
+                String t = values.access_token;
 
-            double expiresIn = Convert.ToDouble(values.expires_in);
-            DateTime expiration = DateTime.Now;
-            tokenExpiration = expiration.AddSeconds(expiresIn);
+                double expiresIn = Convert.ToDouble(values.expires_in);
+                DateTime expiration = DateTime.Now;
+                tokenExpiration = expiration.AddSeconds(expiresIn);
 
-            token = t;
+                token = t;
+            }
+            catch(Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("Unable to get new token. Make sure it has been 15 minutes since you requested a new token"); 
+                //^ iot.jorgvisch only allows to request a new token every 15 minutes, to bypass this time limit one can manually reset the token on iot.jorgvisch.nl
+                System.Diagnostics.Debug.WriteLine("Exception :" + e.ToString());
+
+                throw (e);
+            }
         }
     }
 }

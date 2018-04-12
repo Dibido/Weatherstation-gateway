@@ -45,34 +45,53 @@ namespace WeerstationFramework
 
         public static HttpResponseMessage getData(int count)
         {
-            Token.GetToken();
+                Token.GetToken();
+           
             HttpWebRequest request = WebRequest.CreateHttp("http://iot.jorgvisch.nl/api/weather/" + count.ToString());
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + Token.token);
 
-            WebResponse httpresponse = request.GetResponse();
-
-            Stream data = httpresponse.GetResponseStream();
-            StreamReader reader = new StreamReader(data);
-            string json = reader.ReadToEnd();
-
-            TempData[] values = JsonConvert.DeserializeObject<TempData[]>(json);
-
-            List<String> tableContents = new List<string>();
-            String header = "<tr><th>Weatherstation</th><th>Timestamp</th><th>Temperature</th><th>Illuminance</th></tr>";
-            tableContents.Add(header);
-            foreach (TempData d in values)
+            try // Getting response from the server
             {
-                var trs = String.Format("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>", d.Weatherstation, d.Timestamp, d.Temperature, d.Illuminance);
-                tableContents.Add(trs);
+                WebResponse httpresponse = request.GetResponse();
+
+                Stream data = httpresponse.GetResponseStream();
+                StreamReader reader = new StreamReader(data);
+                string json = reader.ReadToEnd();
+
+                TempData[] values = JsonConvert.DeserializeObject<TempData[]>(json);
+
+                List<String> tableContents = new List<string>();
+                String header = "<tr><th>Weatherstation</th><th>Timestamp</th><th>Temperature</th><th>Illuminance</th></tr>";
+                tableContents.Add(header);
+                foreach (TempData d in values)
+                {
+                    var trs = String.Format("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>", d.Weatherstation, d.Timestamp, d.Temperature, d.Illuminance);
+                    tableContents.Add(trs);
+                }
+
+                var combinedString = String.Join("", tableContents.ToArray());
+                var table = "<!DOCTYPE html><html><head><title>Temperature Data</title></head><body><table>" + combinedString + "</table></body></html>";
+                var response = new HttpResponseMessage();
+                response.Content = new StringContent(table);
+                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
+
+                return response;
             }
+            //Failed to get a valid response.
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("Unable to get data with with count = " + count.ToString() + ".");
+                System.Diagnostics.Debug.WriteLine("Exception :" + e.ToString());
 
-            var combinedString = String.Join("", tableContents.ToArray());
-            var table = "<!DOCTYPE html><html><head><title>Temperature Data</title></head><body><table>" + combinedString + "</table></body></html>";
-            var response = new HttpResponseMessage();
-            response.Content = new StringContent(table);
-            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
+                int maxCount = 50; // Max number of values iot.jorgvisch will handle when requesting data
+                String errorString = "Error, data could not be retrieved. The requested number of values (count) was " + count.ToString() + ". The maximum number of values (count) that will be correctly handled is " + maxCount.ToString() + ".";
+                var errorData = "<!DOCTYPE html><html><head><title>Temperature Data</title></head><body><p>" + errorString + "</p></body></html>";
+                var response = new HttpResponseMessage();
+                response.Content = new StringContent(errorData);
+                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
 
-            return response;
+                return response;
+            }
         }
 
         public static void sendSensorData(String name, DateTime time, decimal temp, decimal lux)
